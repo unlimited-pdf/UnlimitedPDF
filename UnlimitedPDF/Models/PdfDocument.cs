@@ -9,6 +9,7 @@ public class PdfDocument
     private readonly PdfHeader _header;
     private readonly PdfBody _body;
     private readonly PdfPages _pages;
+    private readonly List<PdfPageBuilder> _pageBuilders = new();
 
     /// <summary>
     /// Gets or sets the default page size for the document.
@@ -41,6 +42,12 @@ public class PdfDocument
     /// <param name="path"></param>
     public void Write(string path)
     {
+        // Finalize page content before writing
+        foreach (var page in _pageBuilders)
+        {
+            page.UpdateContentStream();
+        }
+
         using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
         using var writer = new StreamWriter(fs, Encoding.ASCII);
 
@@ -99,29 +106,28 @@ public class PdfDocument
     }
 
     /// <summary>
-    /// Adds a new page to the PDF document from the specified content.
+    /// Adds a new page to the PDF document and returns a page object for adding content.
     /// </summary>
-    /// <param name="pageContent">The content to be added to the new page.</param>
-    public void AddPageFromContent(PdfPageContent pageContent)
+    /// <returns>A <see cref="PdfPageBuilder"/> object to which content can be added.</returns>
+    public PdfPageBuilder AddPage()
     {
-        if (pageContent is null)
-            throw new ArgumentNullException(nameof(pageContent), "Page content cannot be null.");
-
-        // Find the pages object
+        // Find the pages object, which is always object number 2.
         var pagesObject = _body.Objects.First(o => o.ObjectNumber == 2);
-            
-        // Create new page and content stream objects
+
+        // Determine object numbers for the new page and its content stream.
         int pageObjectNumber = _body.Objects.Max(o => o.ObjectNumber) + 1;
         int contentStreamObjectNumber = pageObjectNumber + 1;
 
-        var contentStream = new PdfPageContentStream(pageContent.ToString())
+        // Create an empty content stream object. It will be populated with content just before the document is written.
+        var contentStream = new PdfPageContentStream(string.Empty)
         {
             ObjectNumber = contentStreamObjectNumber
         };
 
-        var page = new PdfPage
+        // Create pdf page internal object
+        var pageInternal = new PdfPage
         {
-            Parent = new PdfIndirectReference { ObjectNumber = 2 },
+            Parent = new PdfIndirectReference { ObjectNumber = 2 }, // Parent is the /Pages object
             Contents = new PdfIndirectReference { ObjectNumber = contentStreamObjectNumber },
             MediaBox = PageSize.ToMediaBoxString()
         };
@@ -129,15 +135,21 @@ public class PdfDocument
         var pageObject = new PdfObject
         {
             ObjectNumber = pageObjectNumber,
-            Content = page.ToString()
+            Content = pageInternal.ToString()
         };
 
-        // Add new objects to the body
+        // Add the new page and content stream objects to the document body.
         _body.AddObject(pageObject);
         _body.AddObject(contentStream);
 
-        // Update the Kids array in the pages object
+        // Update the /Kids array in the /Pages object to include the new page.
         _pages.Kids.Add(new PdfIndirectReference { ObjectNumber = pageObjectNumber });
         pagesObject.Content = _pages.ToString();
+
+        // Create a new Page builder, associate it with the content stream, and add it to our list.
+        var pageBuilder = new PdfPageBuilder(contentStream);
+        _pageBuilders.Add(pageBuilder);
+
+        return pageBuilder;
     }
 }

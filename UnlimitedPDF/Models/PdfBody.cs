@@ -5,7 +5,7 @@ namespace UnlimitedPDF.Models;
 /// <summary>
 /// Represents a fundamental object in a PDF file. Each object has a unique number and a generation number.
 /// </summary>
-public class PdfObject
+internal class PdfObject
 {
     /// <summary>
     /// Gets or sets the unique identifier for the object within the PDF document.
@@ -39,7 +39,7 @@ public class PdfObject
 /// <summary>
 /// Represents a PDF object that contains a stream of data, such as page content or an image.
 /// </summary>
-public class PdfStreamObject : PdfObject
+internal class PdfStreamObject : PdfObject
 {
     /// <summary>
     /// Gets or sets the raw byte data for the stream.
@@ -66,7 +66,7 @@ public class PdfStreamObject : PdfObject
 /// <summary>
 /// Represents an indirect reference to another PDF object.
 /// </summary>
-public class PdfIndirectReference
+internal class PdfIndirectReference
 {
     /// <summary>
     /// Gets or sets the object number of the referenced object.
@@ -91,7 +91,7 @@ public class PdfIndirectReference
 /// <summary>
 /// Represents a PDF dictionary, a collection of key-value pairs.
 /// </summary>
-public class PdfDictionary
+internal class PdfDictionary
 {
     private readonly Dictionary<string, string> _entries = new();
 
@@ -125,7 +125,7 @@ public class PdfDictionary
 /// <summary>
 /// Represents the header of a PDF file, specifying the PDF version.
 /// </summary>
-public class PdfHeader
+internal class PdfHeader
 {
     /// <summary>
     /// Gets or sets the PDF version. Defaults to "1.7".
@@ -145,7 +145,7 @@ public class PdfHeader
 /// <summary>
 /// Represents the body of a PDF document, which contains a collection of PDF objects.
 /// </summary>
-public class PdfBody
+internal class PdfBody
 {
     /// <summary>
     /// Gets or sets the list of PDF objects that make up the document's body.
@@ -179,7 +179,7 @@ public class PdfBody
 /// <summary>
 /// Represents the document catalog, the root object of a PDF's object hierarchy.
 /// </summary>
-public class PdfCatalog
+internal class PdfCatalog
 {
     /// <summary>
     /// Gets or sets the indirect reference to the page tree root (<see cref="PdfPages"/> object).
@@ -204,7 +204,7 @@ public class PdfCatalog
 /// <summary>
 /// Represents a page tree node, which contains a list of pages or other page tree nodes.
 /// </summary>
-public class PdfPages
+internal class PdfPages
 {
     /// <summary>
     /// Gets or sets the list of indirect references to child pages (<see cref="PdfPage"/> objects).
@@ -235,7 +235,7 @@ public class PdfPages
 /// <summary>
 /// Represents a single page in a PDF document.
 /// </summary>
-public class PdfPage
+internal class PdfPage
 {
     /// <summary>
     /// Gets or sets the indirect reference to the parent page tree node (<see cref="PdfPages"/> object).
@@ -349,20 +349,26 @@ public class PdfTextElement
 }
 
 /// <summary>
-/// Manages the content stream for a PDF page, allowing for the addition of elements like text.
+/// Manages the content for a PDF page, allowing for the addition of elements like text.
 /// </summary>
-public class PdfPageContent
+public class PdfPageBuilder
 {
+    private readonly PdfPageContentStream _contentStream;
     private readonly List<object> _contentElements = new();
 
+    internal PdfPageBuilder(PdfPageContentStream contentStream)
+    {
+        _contentStream = contentStream;
+    }
+
     /// <summary>
-    /// Adds a text element to the page content.
+    /// Adds a text element to the content at the specified position with the given font settings.
     /// </summary>
-    /// <param name="text">The text to display.</param>
-    /// <param name="x">The X coordinate.</param>
-    /// <param name="y">The Y coordinate.</param>
-    /// <param name="fontSize">The font size.</param>
-    /// <param name="fontName">The font resource name.</param>
+    /// <param name="text">The text to be added to the content. Cannot be null.</param>
+    /// <param name="x">The x-coordinate of the text's position, in points.</param>
+    /// <param name="y">The y-coordinate of the text's position, in points.</param>
+    /// <param name="fontSize">The size of the font, in points. The default value is 12.</param>
+    /// <param name="fontName">The name of the font to use. The default value is "F1".</param>
     public void AddText(string text, int x, int y, int fontSize = 12, string fontName = "F1")
     {
         _contentElements.Add(new PdfTextElement
@@ -376,24 +382,23 @@ public class PdfPageContent
     }
 
     /// <summary>
-    /// Returns the complete string for the page's content stream by combining all elements.
+    /// Compiles the content elements and updates the associated stream data.
     /// </summary>
-    /// <returns>A string representing the full content stream.</returns>
-    public override string ToString()
+    internal void UpdateContentStream()
     {
         var sb = new StringBuilder();
         foreach (var element in _contentElements)
         {
             sb.AppendLine(element.ToString());
         }
-        return sb.ToString().Trim();
+        _contentStream.StreamData = Encoding.ASCII.GetBytes(sb.ToString().Trim());
     }
 }
 
 /// <summary>
 /// Represents a content stream object for a PDF page.
 /// </summary>
-public class PdfPageContentStream : PdfStreamObject
+internal class PdfPageContentStream : PdfStreamObject
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="PdfPageContentStream"/> class with the specified content.
@@ -402,5 +407,82 @@ public class PdfPageContentStream : PdfStreamObject
     public PdfPageContentStream(string content)
     {
         StreamData = Encoding.ASCII.GetBytes(content);
+    }
+}
+
+/// <summary>
+/// Represents the cross-reference (xref) table of a PDF document.
+/// </summary>
+internal class PdfXrefTable
+{
+    private readonly List<long> _offsets = new();
+
+    /// <summary>
+    /// Adds the byte offset of a PDF object to the table.
+    /// </summary>
+    /// <param name="offset">The byte offset of the object in the file stream.</param>
+    public void AddOffset(long offset)
+    {
+        _offsets.Add(offset);
+    }
+
+    /// <summary>
+    /// Returns the string representation of the xref table.
+    /// </summary>
+    /// <returns>A formatted string for the xref section.</returns>
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("xref");
+        sb.AppendLine($"0 {_offsets.Count + 1}");
+        sb.AppendLine("0000000000 65535 f "); // Special entry for object 0
+
+        foreach (var offset in _offsets)
+        {
+            sb.AppendLine($"{offset:D10} 00000 n ");
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Gets the total number of objects in the xref table, including the special object 0.
+    /// </summary>
+    public int Size => _offsets.Count + 1;
+}
+
+/// <summary>
+/// Represents the trailer of a PDF document.
+/// </summary>
+internal class PdfTrailer
+{
+    /// <summary>
+    /// Gets or sets the byte offset of the cross-reference table.
+    /// </summary>
+    public long XrefPosition { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total number of objects in the document.
+    /// </summary>
+    public int Size { get; set; }
+
+    /// <summary>
+    /// Gets or sets the indirect reference to the document's catalog (root) object.
+    /// </summary>
+    public PdfIndirectReference Root { get; set; } = new();
+
+    /// <summary>
+    /// Returns the string representation of the trailer section.
+    /// </summary>
+    /// <returns>A formatted string for the trailer.</returns>
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("trailer");
+        sb.AppendLine($"<< /Root {Root} /Size {Size} >>");
+        sb.AppendLine("startxref");
+        sb.AppendLine(XrefPosition.ToString());
+        sb.AppendLine("%%EOF");
+        return sb.ToString();
     }
 }

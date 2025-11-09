@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <PackageId>UnlimitedPDF</PackageId>
-    <Version>0.0.1</Version>
-    <PackageVersion>0.0.1</PackageVersion>
+    <Version>0.0.2</Version>
+    <PackageVersion>0.0.2</PackageVersion>
     
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/unlimited-pdf/UnlimitedPDF</RepositoryUrl>
-    <PackageTags>pdf,unlimitedpdf,unlimited-pdf,dotnet,pdf-library,pdf-generation,pdf-manipulation,pdf-merge,pdf-split,pdf-watermark,pdf-signing,pdf-encryption,pdf-rendering,enterprise,cross-platform</PackageTags>
+    <PackageTags>pdf, unlimitedpdf, unlimited-pdf, pdflibray, pdf-library, pdf-generation, pdf-merge, pdf-split, pdf-watermark, pdf-signing, pdf-encryption, pdf-rendering</PackageTags>
     <Description>UnlimitedPDF is a pure .NET library for enterprise-grade PDF operations, including creation, manipulation, merging, splitting, watermarking, signing, encryption, and rendering. It is designed for cross-platform .NET 6, .NET 8, and .NET 9 applications, with a focus on reliability, performance, and an ergonomic API for global developers.</Description>
     <Authors>Vikram Reddy</Authors>
     <!--<Company>Unlimited PDF</Company>-->

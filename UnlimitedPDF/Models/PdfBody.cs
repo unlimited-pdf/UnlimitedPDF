@@ -123,30 +123,6 @@ public class PdfDictionary
 }
 
 /// <summary>
-/// Represents a raw stream of data in a PDF file.
-/// </summary>
-public class PdfStream
-{
-    /// <summary>
-    /// Gets or sets the byte array containing the stream's data.
-    /// </summary>
-    public byte[] Data { get; set; } = Array.Empty<byte>();
-
-    /// <summary>
-    /// Returns the string representation of the stream, enclosed by "stream" and "endstream" keywords.
-    /// </summary>
-    /// <returns>A string representing the PDF stream.</returns>
-    public override string ToString()
-    {
-        var sb = new StringBuilder();
-        sb.AppendLine("stream");
-        sb.AppendLine(Encoding.ASCII.GetString(Data));
-        sb.AppendLine("endstream");
-        return sb.ToString();
-    }
-}
-
-/// <summary>
 /// Represents the header of a PDF file, specifying the PDF version.
 /// </summary>
 public class PdfHeader
@@ -402,5 +378,20 @@ public class PdfPageContent
             sb.AppendLine(element.ToString());
         }
         return sb.ToString().Trim();
+    }
+}
+
+/// <summary>
+/// Represents a content stream object for a PDF page.
+/// </summary>
+public class PdfPageContentStream : PdfStreamObject
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PdfPageContentStream"/> class with the specified content.
+    /// </summary>
+    /// <param name="content">The content string for the stream.</param>
+    public PdfPageContentStream(string content)
+    {
+        StreamData = Encoding.ASCII.GetBytes(content);
     }
 }

@@ -20,6 +20,7 @@ public class PdfDocument
         // Create page content
         var pageContent = new PdfPageContent();
         pageContent.AddText("Hello from Unlimited PDF library", 100, 700, 24);
+        pageContent.AddText("Hello from Unlimited PDF library2", 105, 705, 24);
         var contentStream = new PdfPageContentStream(pageContent.ToString()) { ObjectNumber = 4 };
 
         // Define a font resource

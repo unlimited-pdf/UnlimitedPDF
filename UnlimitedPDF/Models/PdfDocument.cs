@@ -1,8 +1,4 @@
-﻿using System.Text;
-using UnlimitedPDF.Enums;
-using UnlimitedPDF.Extensions;
-
-namespace UnlimitedPDF.Models;
+﻿namespace UnlimitedPDF;
 
 public class PdfDocument
 {

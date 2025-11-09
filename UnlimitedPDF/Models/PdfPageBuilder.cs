@@ -1,4 +1,4 @@
-﻿namespace UnlimitedPDF.Models;
+﻿namespace UnlimitedPDF;
 
 /// <summary>
 /// Manages the content for a PDF page, allowing for the addition of elements like text.

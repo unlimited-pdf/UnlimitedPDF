@@ -1,0 +1,47 @@
+﻿namespace UnlimitedPDF.Models.Internal;
+
+/// <summary>
+/// Represents a single page in a PDF document.
+/// </summary>
+internal class PdfPage
+{
+    /// <summary>
+    /// Gets or sets the indirect reference to the parent page tree node (<see cref="PdfPages"/> object).
+    /// </summary>
+    public PdfIndirectReference Parent { get; set; } = new PdfIndirectReference();
+
+    /// <summary>
+    /// Gets or sets the page's dimensions, represented as a PDF MediaBox string (e.g., "[0 0 595 842]"):
+    /// </summary>
+    public string MediaBox { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the indirect reference to the page's content stream (<see cref="PdfStreamObject"/>).
+    /// </summary>
+    public PdfIndirectReference Contents { get; set; } = new PdfIndirectReference();
+
+    /// <summary>
+    /// Gets or sets the dictionary of resources for the page, such as fonts.
+    /// </summary>
+    public PdfDictionary Resources { get; set; } = new PdfDictionary();
+
+    /// <summary>
+    /// Returns the string representation of the PDF page dictionary.
+    /// </summary>
+    /// <returns>A string representing the page dictionary.</returns>
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("<<");
+        sb.AppendLine("/Type /Page");
+        sb.AppendLine($"/Parent {Parent}");
+        if (!string.IsNullOrEmpty(MediaBox))
+        {
+            sb.AppendLine($"/MediaBox {MediaBox}");
+        }
+        sb.AppendLine($"/Contents {Contents}");
+        sb.AppendLine($"/Resources {Resources}");
+        sb.AppendLine(">>");
+        return sb.ToString();
+    }
+}

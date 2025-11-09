@@ -1,0 +1,26 @@
+﻿namespace UnlimitedPDF.Models.Internal;
+
+/// <summary>
+/// Represents the document catalog, the root object of a PDF's object hierarchy.
+/// </summary>
+internal class PdfCatalog
+{
+    /// <summary>
+    /// Gets or sets the indirect reference to the page tree root (<see cref="PdfPages"/> object).
+    /// </summary>
+    public PdfIndirectReference Pages { get; set; } = new PdfIndirectReference();
+
+    /// <summary>
+    /// Returns the string representation of the PDF catalog dictionary.
+    /// </summary>
+    /// <returns>A string representing the catalog dictionary.</returns>
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("<<");
+        sb.AppendLine("/Type /Catalog");
+        sb.AppendLine($"/Pages {Pages}");
+        sb.AppendLine(">>");
+        return sb.ToString();
+    }
+}

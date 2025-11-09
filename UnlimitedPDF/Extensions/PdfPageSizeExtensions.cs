@@ -44,10 +44,10 @@ public static class PdfPageSizeExtensions
     /// <remarks>The returned string specifies the lower-left and upper-right corners of the media box in a
     /// coordinate system where the origin is at the lower-left corner of the page.</remarks>
     /// <param name="pageSize">The page size to convert.</param>
-    /// <returns>A string representing the media box dimensions in the format "0 0 [width] [height]".</returns>
+    /// <returns>A string representing the media box dimensions in the format "[0 0 width height]".</returns>
     public static string ToMediaBoxString(this UnlimitedPDF.Enums.PdfPageSize pageSize)
     {
         var (width, height) = pageSize.ToDimensions();
-        return $"/MediaBox [0 0 {width.ToString(CultureInfo.InvariantCulture)} {height.ToString(CultureInfo.InvariantCulture)}]";
+        return $"[0 0 {width.ToString(CultureInfo.InvariantCulture)} {height.ToString(CultureInfo.InvariantCulture)}]";
     }
 }

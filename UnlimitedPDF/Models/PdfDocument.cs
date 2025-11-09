@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using UnlimitedPDF.Enums;
+using UnlimitedPDF.Extensions;
 
 namespace UnlimitedPDF.Models;
 
@@ -6,31 +8,30 @@ public class PdfDocument
 {
     private readonly PdfHeader _header;
     private readonly PdfBody _body;
+    private readonly PdfPages _pages;
 
-    public PdfDocument()
+    /// <summary>
+    /// Gets or sets the default page size for the document.
+    /// </summary>
+    public PdfPageSize PageSize { get; set; }
+
+    public PdfDocument(PdfPageSize pageSize = PdfPageSize.A4)
     {
+        PageSize = pageSize;
         _header = new PdfHeader();
         _body = new PdfBody();
+        _pages = new PdfPages();
 
         // Build the core PDF document structure
         var catalog = new PdfObject { ObjectNumber = 1, Content = new PdfCatalog { Pages = new PdfIndirectReference { ObjectNumber = 2 } }.ToString() };
-        var pages = new PdfObject { ObjectNumber = 2, Content = new PdfPages { Kids = new List<PdfIndirectReference> { new() { ObjectNumber = 3 } } }.ToString() };
-        var page = new PdfObject { ObjectNumber = 3, Content = new PdfPage { Parent = new PdfIndirectReference { ObjectNumber = 2 }, Contents = new PdfIndirectReference { ObjectNumber = 4 } }.ToString() };
-
-        // Create page content
-        var pageContent = new PdfPageContent();
-        pageContent.AddText("Hello from Unlimited PDF library", 100, 700, 24);
-        pageContent.AddText("Hello from Unlimited PDF library2", 105, 705, 24);
-        var contentStream = new PdfPageContentStream(pageContent.ToString()) { ObjectNumber = 4 };
+        var pagesObject = new PdfObject { ObjectNumber = 2, Content = _pages.ToString() };
 
         // Define a font resource
-        var font = new PdfObject { ObjectNumber = 5, Content = new PdfFont().ToString() };
+        var font = new PdfObject { ObjectNumber = 3, Content = new PdfFont().ToString() };
 
         // Add all objects to the document body
         _body.AddObject(catalog);
-        _body.AddObject(pages);
-        _body.AddObject(page);
-        _body.AddObject(contentStream);
+        _body.AddObject(pagesObject);
         _body.AddObject(font);
     }
 
@@ -98,22 +99,45 @@ public class PdfDocument
     }
 
     /// <summary>
-    /// Adds a new page to the PDF document.
+    /// Adds a new page to the PDF document from the specified content.
     /// </summary>
-    /// <remarks>The page is converted to a PDF object and appended to the document's body.  Ensure the
-    /// <paramref name="page"/> parameter is properly initialized before calling this method.</remarks>
-    /// <param name="page">The <see cref="PdfPage"/> instance representing the page to be added.</param>
-    public void AddPage(PdfPage page)
+    /// <param name="pageContent">The content to be added to the new page.</param>
+    public void AddPageFromContent(PdfPageContent pageContent)
     {
-        if (page is null)
-            throw new ArgumentNullException(nameof(page), "Page cannot be null.");
+        if (pageContent is null)
+            throw new ArgumentNullException(nameof(pageContent), "Page content cannot be null.");
+
+        // Find the pages object
+        var pagesObject = _body.Objects.First(o => o.ObjectNumber == 2);
+            
+        // Create new page and content stream objects
+        int pageObjectNumber = _body.Objects.Max(o => o.ObjectNumber) + 1;
+        int contentStreamObjectNumber = pageObjectNumber + 1;
+
+        var contentStream = new PdfPageContentStream(pageContent.ToString())
+        {
+            ObjectNumber = contentStreamObjectNumber
+        };
+
+        var page = new PdfPage
+        {
+            Parent = new PdfIndirectReference { ObjectNumber = 2 },
+            Contents = new PdfIndirectReference { ObjectNumber = contentStreamObjectNumber },
+            MediaBox = PageSize.ToMediaBoxString()
+        };
 
         var pageObject = new PdfObject
         {
-            ObjectNumber = _body.Objects.Count + 1,
+            ObjectNumber = pageObjectNumber,
             Content = page.ToString()
         };
 
+        // Add new objects to the body
         _body.AddObject(pageObject);
+        _body.AddObject(contentStream);
+
+        // Update the Kids array in the pages object
+        _pages.Kids.Add(new PdfIndirectReference { ObjectNumber = pageObjectNumber });
+        pagesObject.Content = _pages.ToString();
     }
 }

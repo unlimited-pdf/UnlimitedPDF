@@ -243,6 +243,11 @@ public class PdfPage
     public PdfIndirectReference Parent { get; set; } = new PdfIndirectReference();
 
     /// <summary>
+    /// Gets or sets the page's dimensions, represented as a PDF MediaBox string (e.g., "[0 0 595 842]"):
+    /// </summary>
+    public string MediaBox { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets the indirect reference to the page's content stream (<see cref="PdfStreamObject"/>).
     /// </summary>
     public PdfIndirectReference Contents { get; set; } = new PdfIndirectReference();
@@ -262,6 +267,10 @@ public class PdfPage
         sb.AppendLine("<<");
         sb.AppendLine("/Type /Page");
         sb.AppendLine($"/Parent {Parent}");
+        if (!string.IsNullOrEmpty(MediaBox))
+        {
+            sb.AppendLine($"/MediaBox {MediaBox}");
+        }
         sb.AppendLine($"/Contents {Contents}");
         sb.AppendLine($"/Resources {Resources}");
         sb.AppendLine(">>");

@@ -5,9 +5,32 @@ namespace UnlimitedPDF.Models;
 public class PdfDocument
 {
     private readonly PdfHeader _header;
+    private readonly PdfBody _body;
+
     public PdfDocument()
     {
         _header = new PdfHeader();
+        _body = new PdfBody();
+
+        // Build the core PDF document structure
+        var catalog = new PdfObject { ObjectNumber = 1, Content = new PdfCatalog { Pages = new PdfIndirectReference { ObjectNumber = 2 } }.ToString() };
+        var pages = new PdfObject { ObjectNumber = 2, Content = new PdfPages { Kids = new List<PdfIndirectReference> { new() { ObjectNumber = 3 } } }.ToString() };
+        var page = new PdfObject { ObjectNumber = 3, Content = new PdfPage { Parent = new PdfIndirectReference { ObjectNumber = 2 }, Contents = new PdfIndirectReference { ObjectNumber = 4 } }.ToString() };
+
+        // Create page content
+        var pageContent = new PdfPageContent();
+        pageContent.AddText("Hello from Unlimited PDF library", 100, 700, 24);
+        var contentStream = new PdfPageContentStream(pageContent.ToString()) { ObjectNumber = 4 };
+
+        // Define a font resource
+        var font = new PdfObject { ObjectNumber = 5, Content = new PdfFont().ToString() };
+
+        // Add all objects to the document body
+        _body.AddObject(catalog);
+        _body.AddObject(pages);
+        _body.AddObject(page);
+        _body.AddObject(contentStream);
+        _body.AddObject(font);
     }
 
     /// <summary>
@@ -24,45 +47,30 @@ public class PdfDocument
 
         // PDF Header
         writer.WriteLine(_header.ToString());
-
-        // 1. Catalog object
-        offsets.Add(fs.Position);
-        writer.WriteLine("1 0 obj");
-        writer.WriteLine("<< /Type /Catalog /Pages 2 0 R >>");
-        writer.WriteLine("endobj");
-
-        // 2. Pages object
-        offsets.Add(fs.Position);
-        writer.WriteLine("2 0 obj");
-        writer.WriteLine("<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
-        writer.WriteLine("endobj");
-
-        // 3. Page object
-        offsets.Add(fs.Position);
-        writer.WriteLine("3 0 obj");
-        writer.WriteLine("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << >> >>");
-        writer.WriteLine("endobj");
-
-        // 4. Content stream
-        string content = "BT /F1 24 Tf 100 700 Td (hello from Unlimited PDF library) Tj ET";
-        byte[] contentBytes = Encoding.ASCII.GetBytes(content);
-        offsets.Add(fs.Position);
-        writer.WriteLine("4 0 obj");
-        writer.WriteLine("<< /Length " + contentBytes.Length + " >>");
-        writer.WriteLine("stream");
         writer.Flush();
-        fs.Write(contentBytes, 0, contentBytes.Length);
-        writer.WriteLine("\nendstream");
-        writer.WriteLine("endobj");
 
-        // 5. Font object (define built-in Helvetica)
-        offsets.Add(fs.Position);
-        writer.WriteLine("5 0 obj");
-        writer.WriteLine("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
-        writer.WriteLine("endobj");
-
-        // Update page resource dictionary to include font
-        // (minimal example won't handle cross references here)
+        // Write PDF objects from the body
+        foreach (var obj in _body.Objects)
+        {
+            offsets.Add(fs.Position);
+            if (obj is PdfStreamObject streamObj)
+            {
+                // Custom writing for stream objects to handle byte arrays
+                writer.WriteLine($"{streamObj.ObjectNumber} {streamObj.GenerationNumber} obj");
+                writer.WriteLine($"<< /Length {streamObj.StreamData.Length} >>");
+                writer.WriteLine("stream");
+                writer.Flush();
+                fs.Write(streamObj.StreamData, 0, streamObj.StreamData.Length);
+                writer.WriteLine();
+                writer.WriteLine("endstream");
+                writer.WriteLine("endobj");
+            }
+            else
+            {
+                writer.WriteLine(obj.ToString());
+            }
+            writer.Flush();
+        }
 
         // XRef position
         long xrefPosition = fs.Position;
@@ -77,16 +85,34 @@ public class PdfDocument
         // Write offsets
         foreach (var offset in offsets)
         {
-            // Each offset is written as a 10-digit zero-padded number
-            // followed by a space, 5-digit generation number (00000), a space, and 'n' for in-use
             writer.WriteLine($"{offset:D10} 00000 n ");
         }
 
         // Trailer
         writer.WriteLine("trailer");
-        writer.WriteLine("<< /Root 1 0 R /Size 6 >>");
+        writer.WriteLine($"<< /Root 1 0 R /Size {size} >>");
         writer.WriteLine("startxref");
         writer.WriteLine(xrefPosition);
         writer.WriteLine("%%EOF");
+    }
+
+    /// <summary>
+    /// Adds a new page to the PDF document.
+    /// </summary>
+    /// <remarks>The page is converted to a PDF object and appended to the document's body.  Ensure the
+    /// <paramref name="page"/> parameter is properly initialized before calling this method.</remarks>
+    /// <param name="page">The <see cref="PdfPage"/> instance representing the page to be added.</param>
+    public void AddPage(PdfPage page)
+    {
+        if (page is null)
+            throw new ArgumentNullException(nameof(page), "Page cannot be null.");
+
+        var pageObject = new PdfObject
+        {
+            ObjectNumber = _body.Objects.Count + 1,
+            Content = page.ToString()
+        };
+
+        _body.AddObject(pageObject);
     }
 }

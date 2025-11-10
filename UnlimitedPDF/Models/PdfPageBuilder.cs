@@ -107,9 +107,26 @@ public class PdfPageBuilder
                     sb.AppendLine("BT"); // Begin text
                     sb.AppendLine("0 0 0 rg"); // Set text color to black
                     sb.AppendLine($"/F1 12 Tf"); // Font
-                    // Position text with padding and vertical alignment
+
+                    // Calculate text position based on horizontal alignment
+                    double textWidth = GetTextWidth(cell.Text, 12);
+                    double textX;
+
+                    switch (cell.HAlign)
+                    {
+                        case HAlign.Right:
+                            textX = currentX + cellWidth - textWidth - cell.Padding;
+                            break;
+                        case HAlign.Center:
+                            textX = currentX + (cellWidth - textWidth) / 2;
+                            break;
+                        default: // HAlign.Left
+                            textX = currentX + cell.Padding;
+                            break;
+                    }
+
                     double textY = currentY - (fixedTable.RowHeight / 2) - 4; // Simple middle alignment
-                    sb.AppendLine($"1 0 0 1 {currentX + cell.Padding} {textY} Tm"); // Set text matrix for absolute position
+                    sb.AppendLine($"1 0 0 1 {textX} {textY} Tm"); // Set text matrix for absolute position
                     sb.AppendLine($"({cell.Text}) Tj"); // Show text
                     sb.AppendLine("ET"); // End text
                 }
@@ -122,5 +139,11 @@ public class PdfPageBuilder
         }
 
         return sb.ToString();
+    }
+
+    // A simple approximation for text width. For accurate results, you would need font metrics.
+    private double GetTextWidth(string text, int fontSize)
+    {
+        return text.Length * fontSize * 0.5;
     }
 }

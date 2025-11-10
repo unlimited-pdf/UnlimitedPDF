@@ -1,9 +1,5 @@
 ﻿namespace UnlimitedPDF.Models.Table;
 
-public enum HAlign { Left, Center, Right }
-public enum VAlign { Top, Middle, Bottom }
-public enum PdfBorderStyle { None, Solid, Dashed, Double }
-
 public class PdfTable
 {
     private readonly List<PdfTableRow> _rows = new();

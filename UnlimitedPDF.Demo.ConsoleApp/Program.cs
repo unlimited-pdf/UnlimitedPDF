@@ -1,4 +1,5 @@
 ﻿using UnlimitedPDF;
+using UnlimitedPDF.Enums;
 using UnlimitedPDF.Models.Table;
 
 Console.WriteLine("Start: Unlimited PDF");
@@ -50,22 +51,22 @@ var item1Row = itemsTable.AddRow();
 item1Row.GetCell(0).Text = "1";
 item1Row.GetCell(1).Text = "Wireless Keyboard";
 item1Row.GetCell(2).Text = "2";
-item1Row.GetCell(2).HAlign = HAlign.Right;
+item1Row.GetCell(2).HAlign = PdfCellHorizontalAlignment.Right;
 item1Row.GetCell(3).Text = "1250.00";
-item1Row.GetCell(3).HAlign = HAlign.Right;
+item1Row.GetCell(3).HAlign = PdfCellHorizontalAlignment.Right;
 item1Row.GetCell(4).Text = "2500.00";
-item1Row.GetCell(4).HAlign = HAlign.Right;
+item1Row.GetCell(4).HAlign = PdfCellHorizontalAlignment.Right;
 
 // Item 2
 var item2Row = itemsTable.AddRow();
 item2Row.GetCell(0).Text = "2";
 item2Row.GetCell(1).Text = "USB-C Docking Station";
 item2Row.GetCell(2).Text = "1";
-item2Row.GetCell(2).HAlign = HAlign.Right;
+item2Row.GetCell(2).HAlign = PdfCellHorizontalAlignment.Right;
 item2Row.GetCell(3).Text = "4500.00";
-item2Row.GetCell(3).HAlign = HAlign.Right;
+item2Row.GetCell(3).HAlign = PdfCellHorizontalAlignment.Right;
 item2Row.GetCell(4).Text = "4500.00";
-item2Row.GetCell(4).HAlign = HAlign.Right;
+item2Row.GetCell(4).HAlign = PdfCellHorizontalAlignment.Right;
 
 // 3. Totals Section
 double subtotal = 7000.00;
@@ -79,17 +80,17 @@ totalsTable.SetColumnWidths(110, 102);
 totalsTable.GetOrCreateCell(0, 0).Text = "Subtotal";
 var subtotalValueCell = totalsTable.GetOrCreateCell(0, 1);
 subtotalValueCell.Text = subtotal.ToString("F2");
-subtotalValueCell.HAlign = HAlign.Right;
+subtotalValueCell.HAlign = PdfCellHorizontalAlignment.Right;
 
 totalsTable.GetOrCreateCell(1, 0).Text = "CGST @ 9%";
 var cgstValueCell = totalsTable.GetOrCreateCell(1, 1);
 cgstValueCell.Text = cgst.ToString("F2");
-cgstValueCell.HAlign = HAlign.Right;
+cgstValueCell.HAlign = PdfCellHorizontalAlignment.Right;
 
 totalsTable.GetOrCreateCell(2, 0).Text = "SGST @ 9%";
 var sgstValueCell = totalsTable.GetOrCreateCell(2, 1);
 sgstValueCell.Text = sgst.ToString("F2");
-sgstValueCell.HAlign = HAlign.Right;
+sgstValueCell.HAlign = PdfCellHorizontalAlignment.Right;
 
 var totalCell = totalsTable.GetOrCreateCell(3, 0);
 totalCell.Text = "Total";
@@ -97,7 +98,7 @@ totalCell.Background = PdfColor.LightGray;
 
 var totalValueCell = totalsTable.GetOrCreateCell(3, 1);
 totalValueCell.Text = total.ToString("F2");
-totalValueCell.HAlign = HAlign.Right;
+totalValueCell.HAlign = PdfCellHorizontalAlignment.Right;
 totalValueCell.Background = PdfColor.LightGray;
 
 // 4. Terms and Conditions

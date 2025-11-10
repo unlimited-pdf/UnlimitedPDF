@@ -3,8 +3,8 @@
 public class PdfTableCell
 {
     public string Text { get; set; } = "";
-    public HAlign HAlign { get; set; } = HAlign.Left;
-    public VAlign VAlign { get; set; } = VAlign.Middle;
+    public PdfCellHorizontalAlignment HAlign { get; set; } = PdfCellHorizontalAlignment.Left;
+    public PdfCellVerticalAlignment VAlign { get; set; } = PdfCellVerticalAlignment.Middle;
     public PdfColor Background { get; set; } = PdfColor.White;
     public double Padding { get; set; } = 4;
 

@@ -114,10 +114,10 @@ public class PdfPageBuilder
 
                     switch (cell.HAlign)
                     {
-                        case HAlign.Right:
+                        case PdfCellHorizontalAlignment.Right:
                             textX = currentX + cellWidth - textWidth - cell.Padding;
                             break;
-                        case HAlign.Center:
+                        case PdfCellHorizontalAlignment.Center:
                             textX = currentX + (cellWidth - textWidth) / 2;
                             break;
                         default: // HAlign.Left

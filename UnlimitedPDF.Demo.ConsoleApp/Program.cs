@@ -114,7 +114,7 @@ page2.AddText("This is the first line on the second page.", 50, 750, 12);
 var page3 = pdfDocument.AddPage();
 page3.AddText("This is the first line on the third page.", 50, 750, 12);
 
-pdfDocument.Write(pdfFilePath);
+pdfDocument.Save(pdfFilePath);
 
 
 Console.WriteLine("End: Unlimited PDF");

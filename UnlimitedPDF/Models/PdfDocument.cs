@@ -36,7 +36,7 @@ public class PdfDocument
     /// Writes a PDF document to the specified file path.
     /// </summary>
     /// <param name="path"></param>
-    public void Write(string path)
+    public void Save(string path)
     {
         // Finalize page content before writing
         foreach (var page in _pageBuilders)

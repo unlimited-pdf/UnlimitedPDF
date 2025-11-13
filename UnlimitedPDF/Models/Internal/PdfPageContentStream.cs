@@ -3,13 +3,10 @@
 /// <summary>
 /// Represents a content stream object for a PDF page.
 /// </summary>
-internal class PdfPageContentStream : PdfStreamObject
+internal sealed class PdfPageContentStream : PdfStreamObject
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PdfPageContentStream"/> class with the specified content.
-    /// </summary>
-    /// <param name="content">The content string for the stream.</param>
-    public PdfPageContentStream(string content)
+    public PdfPageContentStream(int objectNumber, string content, int generationNumber = 0)
+        : base(objectNumber, content, generationNumber)
     {
         StreamData = Encoding.ASCII.GetBytes(content);
     }

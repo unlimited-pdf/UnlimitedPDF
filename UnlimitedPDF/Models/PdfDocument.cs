@@ -20,11 +20,11 @@ public class PdfDocument
         _pages = new PdfPages();
 
         // Build the core PDF document structure
-        var catalog = new PdfObject { ObjectNumber = 1, Content = new PdfCatalog { Pages = new PdfIndirectReference { ObjectNumber = 2 } }.ToString() };
-        var pagesObject = new PdfObject { ObjectNumber = 2, Content = _pages.ToString() };
+        var catalog = new PdfObject(objectNumber: 1, content: new PdfCatalog(pages: new PdfIndirectReference(objectNumber: 2)).ToString());
+        var pagesObject = new PdfObject (objectNumber: 2, content: _pages.ToString());
 
         // Define a font resource
-        var font = new PdfObject { ObjectNumber = 3, Content = new PdfFont().ToString() };
+        var font = new PdfObject(objectNumber: 3, content: new PdfFont().ToString());
 
         // Add all objects to the document body
         _body.AddObject(catalog);
@@ -115,32 +115,25 @@ public class PdfDocument
         int contentStreamObjectNumber = pageObjectNumber + 1;
 
         // Create an empty content stream object. It will be populated with content just before the document is written.
-        var contentStream = new PdfPageContentStream(string.Empty)
-        {
-            ObjectNumber = contentStreamObjectNumber
-        };
+        var contentStream = new PdfPageContentStream(contentStreamObjectNumber, string.Empty);
 
         // Create pdf page internal object
         var pageInternal = new PdfPage
         {
-            Parent = new PdfIndirectReference { ObjectNumber = 2 }, // Parent is the /Pages object
-            Contents = new PdfIndirectReference { ObjectNumber = contentStreamObjectNumber },
+            Parent = new PdfIndirectReference(objectNumber: 2), // Parent is the /Pages object
+            Contents = new PdfIndirectReference(objectNumber: contentStreamObjectNumber),
             MediaBox = PageSize.ToMediaBoxString()
         };
 
-        var pageObject = new PdfObject
-        {
-            ObjectNumber = pageObjectNumber,
-            Content = pageInternal.ToString()
-        };
+        var pageObject = new PdfObject(objectNumber: pageObjectNumber, content: pageInternal.ToString());
 
         // Add the new page and content stream objects to the document body.
         _body.AddObject(pageObject);
         _body.AddObject(contentStream);
 
         // Update the /Kids array in the /Pages object to include the new page.
-        _pages.Kids.Add(new PdfIndirectReference { ObjectNumber = pageObjectNumber });
-        pagesObject.Content = _pages.ToString();
+        _pages.Kids.Add(new PdfIndirectReference(objectNumber: pageObjectNumber));
+        //pagesObject.Content = _pages.ToString(); // TODO: Review this
 
         // Create a new Page builder, associate it with the content stream, and add it to our list.
         var pageBuilder = new PdfPageBuilder(contentStream);

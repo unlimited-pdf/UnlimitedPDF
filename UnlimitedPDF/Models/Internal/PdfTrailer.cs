@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents the trailer of a PDF document.
 /// </summary>
-internal class PdfTrailer
+internal sealed class PdfTrailer
 {
     /// <summary>
     /// Gets or sets the byte offset of the cross-reference table.
@@ -18,7 +18,7 @@ internal class PdfTrailer
     /// <summary>
     /// Gets or sets the indirect reference to the document's catalog (root) object.
     /// </summary>
-    public PdfIndirectReference Root { get; set; } = new();
+    public PdfIndirectReference Root { get; set; }
 
     /// <summary>
     /// Returns the string representation of the trailer section.

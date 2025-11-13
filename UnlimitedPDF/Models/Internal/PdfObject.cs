@@ -5,20 +5,27 @@
 /// </summary>
 internal class PdfObject
 {
+    public PdfObject(int objectNumber, string content, int generationNumber = 0)
+    {
+        ObjectNumber = objectNumber;
+        GenerationNumber = generationNumber;
+        Content = content ?? string.Empty;
+    }
+
     /// <summary>
     /// Gets or sets the unique identifier for the object within the PDF document.
     /// </summary>
-    public int ObjectNumber { get; set; }
+    public int ObjectNumber { get; }
 
     /// <summary>
     /// Gets or sets the generation number of the object. For new objects, this is typically 0.
     /// </summary>
-    public int GenerationNumber { get; set; } = 0;
+    public int GenerationNumber { get; } = 0;
 
     /// <summary>
     /// Gets or sets the string content of the object, which is usually a PDF dictionary.
     /// </summary>
-    public string Content { get; set; } = string.Empty;
+    public string Content { get; }
 
     /// <summary>
     /// Returns the string representation of the PDF object, formatted for inclusion in a PDF file.

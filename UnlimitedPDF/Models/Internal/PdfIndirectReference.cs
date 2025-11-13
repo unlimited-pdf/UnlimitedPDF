@@ -3,17 +3,23 @@
 /// <summary>
 /// Represents an indirect reference to another PDF object.
 /// </summary>
-internal class PdfIndirectReference
+internal sealed class PdfIndirectReference
 {
-    /// <summary>
-    /// Gets or sets the object number of the referenced object.
-    /// </summary>
-    public int ObjectNumber { get; set; }
+    public PdfIndirectReference(int objectNumber, int generationNumber = 0)
+    {
+        ObjectNumber = objectNumber;
+        GenerationNumber = generationNumber;
+    }
 
     /// <summary>
-    /// Gets or sets the generation number of the referenced object.
+    /// Gets the object number of the referenced object.
     /// </summary>
-    public int GenerationNumber { get; set; } = 0;
+    public int ObjectNumber { get; }
+
+    /// <summary>
+    /// Gets the generation number of the referenced object.
+    /// </summary>
+    public int GenerationNumber { get; }
 
     /// <summary>
     /// Returns the string representation of the indirect reference (e.g., "1 0 R").

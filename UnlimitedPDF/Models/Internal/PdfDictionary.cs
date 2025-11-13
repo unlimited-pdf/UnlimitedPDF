@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a PDF dictionary, a collection of key-value pairs.
 /// </summary>
-internal class PdfDictionary
+internal sealed class PdfDictionary
 {
     private readonly Dictionary<string, string> _entries = new();
 

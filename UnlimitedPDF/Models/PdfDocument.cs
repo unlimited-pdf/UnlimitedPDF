@@ -44,6 +44,10 @@ public class PdfDocument
             page.UpdateContentStream();
         }
 
+        // Update the content of the main pages object (object 2) to reflect all added pages.
+        var pagesObject = _body.Objects.First(o => o.ObjectNumber == 2);
+        pagesObject.Content = _pages.ToString();
+
         using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
         using var writer = new StreamWriter(fs, Encoding.ASCII);
 
@@ -107,9 +111,6 @@ public class PdfDocument
     /// <returns>A <see cref="PdfPageBuilder"/> object to which content can be added.</returns>
     public PdfPageBuilder AddPage()
     {
-        // Find the pages object, which is always object number 2.
-        var pagesObject = _body.Objects.First(o => o.ObjectNumber == 2);
-
         // Determine object numbers for the new page and its content stream.
         int pageObjectNumber = _body.Objects.Max(o => o.ObjectNumber) + 1;
         int contentStreamObjectNumber = pageObjectNumber + 1;
@@ -133,7 +134,6 @@ public class PdfDocument
 
         // Update the /Kids array in the /Pages object to include the new page.
         _pages.Kids.Add(new PdfIndirectReference(objectNumber: pageObjectNumber));
-        //pagesObject.Content = _pages.ToString(); // TODO: Review this
 
         // Create a new Page builder, associate it with the content stream, and add it to our list.
         var pageBuilder = new PdfPageBuilder(contentStream);

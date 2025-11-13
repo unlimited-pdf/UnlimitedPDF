@@ -13,19 +13,19 @@ internal class PdfObject
     }
 
     /// <summary>
-    /// Gets or sets the unique identifier for the object within the PDF document.
+    /// Gets the unique identifier for the object within the PDF document.
     /// </summary>
     public int ObjectNumber { get; }
 
     /// <summary>
-    /// Gets or sets the generation number of the object. For new objects, this is typically 0.
+    /// Gets the generation number of the object. For new objects, this is typically 0.
     /// </summary>
     public int GenerationNumber { get; } = 0;
 
     /// <summary>
     /// Gets or sets the string content of the object, which is usually a PDF dictionary.
     /// </summary>
-    public string Content { get; }
+    public string Content { get; set; }
 
     /// <summary>
     /// Returns the string representation of the PDF object, formatted for inclusion in a PDF file.

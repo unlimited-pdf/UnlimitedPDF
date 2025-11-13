@@ -35,8 +35,44 @@ public class PdfDocument
     /// <summary>
     /// Writes a PDF document to the specified file path.
     /// </summary>
-    /// <param name="path"></param>
+    /// <param name="path">The file path where the document will be saved.</param>
     public void Save(string path)
+    {
+        using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
+        WriteToStream(fs);
+    }
+
+    /// <summary>
+    /// Writes a PDF document to the specified stream.
+    /// </summary>
+    /// <param name="stream">The stream to which the document will be written.</param>
+    public void Save(Stream stream)
+    {
+        WriteToStream(stream);
+    }
+
+    /// <summary>
+    /// Asynchronously writes a PDF document to the specified file path.
+    /// </summary>
+    /// <param name="path">The file path where the document will be saved.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    public async Task SaveAsync(string path, CancellationToken cancellationToken = default)
+    {
+        using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
+        await WriteToStreamAsync(fs, cancellationToken);
+    }
+
+    /// <summary>
+    /// Asynchronously writes a PDF document to the specified stream.
+    /// </summary>
+    /// <param name="stream">The stream to which the document will be written.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    public async Task SaveAsync(Stream stream, CancellationToken cancellationToken = default)
+    {
+        await WriteToStreamAsync(stream, cancellationToken);
+    }
+
+    private void PrepareDocumentForSave()
     {
         // Finalize page content before writing
         foreach (var page in _pageBuilders)
@@ -47,9 +83,13 @@ public class PdfDocument
         // Update the content of the main pages object (object 2) to reflect all added pages.
         var pagesObject = _body.Objects.First(o => o.ObjectNumber == 2);
         pagesObject.Content = _pages.ToString();
+    }
 
-        using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
-        using var writer = new StreamWriter(fs, Encoding.ASCII);
+    private void WriteToStream(Stream stream)
+    {
+        PrepareDocumentForSave();
+
+        using var writer = new StreamWriter(stream, Encoding.ASCII, 1024, leaveOpen: true);
 
         // Keep track of object offsets to build the xref table
         var offsets = new List<long>();
@@ -61,7 +101,7 @@ public class PdfDocument
         // Write PDF objects from the body
         foreach (var obj in _body.Objects)
         {
-            offsets.Add(fs.Position);
+            offsets.Add(stream.Position);
             if (obj is PdfStreamObject streamObj)
             {
                 // Custom writing for stream objects to handle byte arrays
@@ -69,7 +109,7 @@ public class PdfDocument
                 writer.WriteLine($"<< /Length {streamObj.StreamData.Length} >>");
                 writer.WriteLine("stream");
                 writer.Flush();
-                fs.Write(streamObj.StreamData, 0, streamObj.StreamData.Length);
+                stream.Write(streamObj.StreamData, 0, streamObj.StreamData.Length);
                 writer.WriteLine();
                 writer.WriteLine("endstream");
                 writer.WriteLine("endobj");
@@ -82,7 +122,7 @@ public class PdfDocument
         }
 
         // XRef position
-        long xrefPosition = fs.Position;
+        long xrefPosition = stream.Position;
         writer.WriteLine("xref");
 
         int size = offsets.Count + 1;
@@ -103,6 +143,68 @@ public class PdfDocument
         writer.WriteLine("startxref");
         writer.WriteLine(xrefPosition);
         writer.WriteLine("%%EOF");
+    }
+
+    private async Task WriteToStreamAsync(Stream stream, CancellationToken cancellationToken = default)
+    {
+        PrepareDocumentForSave();
+
+        using var writer = new StreamWriter(stream, Encoding.ASCII, 1024, leaveOpen: true);
+
+        // Keep track of object offsets to build the xref table
+        var offsets = new List<long>();
+
+        // PDF Header
+        await writer.WriteLineAsync(_header.ToString().AsMemory(), cancellationToken);
+        await writer.FlushAsync();
+
+        // Write PDF objects from the body
+        foreach (var obj in _body.Objects)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            offsets.Add(stream.Position);
+            if (obj is PdfStreamObject streamObj)
+            {
+                // Custom writing for stream objects to handle byte arrays
+                await writer.WriteLineAsync($"{streamObj.ObjectNumber} {streamObj.GenerationNumber} obj".AsMemory(), cancellationToken);
+                await writer.WriteLineAsync($"<< /Length {streamObj.StreamData.Length} >>".AsMemory(), cancellationToken);
+                await writer.WriteLineAsync("stream".AsMemory(), cancellationToken);
+                await writer.FlushAsync();
+                await stream.WriteAsync(streamObj.StreamData, cancellationToken);
+                await writer.WriteLineAsync();
+                await writer.WriteLineAsync("endstream".AsMemory(), cancellationToken);
+                await writer.WriteLineAsync("endobj".AsMemory(), cancellationToken);
+            }
+            else
+            {
+                await writer.WriteLineAsync(obj.ToString().AsMemory(), cancellationToken);
+            }
+            await writer.FlushAsync();
+        }
+
+        // XRef position
+        long xrefPosition = stream.Position;
+        await writer.WriteLineAsync("xref".AsMemory(), cancellationToken);
+
+        int size = offsets.Count + 1;
+        await writer.WriteLineAsync($"0 {size}".AsMemory(), cancellationToken);
+
+        // special entry for object 0
+        await writer.WriteLineAsync("0000000000 65535 f ".AsMemory(), cancellationToken);
+
+        // Write offsets
+        foreach (var offset in offsets)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await writer.WriteLineAsync($"{offset:D10} 00000 n ".AsMemory(), cancellationToken);
+        }
+
+        // Trailer
+        await writer.WriteLineAsync("trailer".AsMemory(), cancellationToken);
+        await writer.WriteLineAsync($"<< /Root 1 0 R /Size {size} >>".AsMemory(), cancellationToken);
+        await writer.WriteLineAsync("startxref".AsMemory(), cancellationToken);
+        await writer.WriteLineAsync(xrefPosition.ToString().AsMemory(), cancellationToken);
+        await writer.WriteLineAsync("%%EOF".AsMemory(), cancellationToken);
     }
 
     /// <summary>

@@ -15,11 +15,11 @@ A powerful and flexible library for creating, manipulating, and managing PDF doc
 
 - **.NET CLI**
   
-  Install with [NuGet](https://www.nuget.org/): `dotnet add package UnlimitedPDF --version 0.0.2`
+  Install with [NuGet](https://www.nuget.org/): `dotnet add package UnlimitedPDF --version 0.0.3`
   
 - **Package Reference**
   
-  Add package reference to project: `<PackageReference Include="UnlimitedPDF" Version="0.0.2" />`
+  Add package reference to project: `<PackageReference Include="UnlimitedPDF" Version="0.0.3" />`
 
 ## Sample Code
 

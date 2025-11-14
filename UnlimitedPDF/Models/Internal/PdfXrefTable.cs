@@ -34,9 +34,4 @@ internal class PdfXrefTable
 
         return sb.ToString();
     }
-
-    /// <summary>
-    /// Gets the total number of objects in the xref table, including the special object 0.
-    /// </summary>
-    public int Size => _offsets.Count + 1;
 }

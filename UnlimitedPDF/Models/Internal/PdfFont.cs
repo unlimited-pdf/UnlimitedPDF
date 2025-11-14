@@ -5,10 +5,15 @@
 /// </summary>
 internal class PdfFont
 {
+    public PdfFont(string fontName = "Helvetica")
+    {
+        FontName = fontName;
+    }
+
     /// <summary>
-    /// Gets or sets the name of the font, such as "Helvetica".
+    /// Gets the name of the font, such as "Helvetica".
     /// </summary>
-    public string FontName { get; set; } = "Helvetica";
+    public string FontName { get; }
 
     /// <summary>
     /// Returns the string representation of the PDF font dictionary.

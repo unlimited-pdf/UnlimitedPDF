@@ -13,21 +13,21 @@ var pdfDocument = new PdfDocument();
 var page1 = pdfDocument.AddPage();
 
 // 1. Invoice Header
-page1.AddText("INVOICE", 250, 800, 20, "F1");
+page1.AddText("INVOICE", 250, 800, 20);
 
 // Seller and Buyer Details
-page1.AddText("Seller:", 50, 760, 10, "F1");
-page1.AddText("ABC Electronics Pvt. Ltd.", 50, 748, 10, "F1");
-page1.AddText("123 Tech Park, Bangalore, KA 560001", 50, 736, 10, "F1");
-page1.AddText("GSTIN: 222222222222225", 50, 724, 10, "F1");
+page1.AddText("Seller:", 50, 760, 10);
+page1.AddText("ABC Electronics Pvt. Ltd.", 50, 748, 10);
+page1.AddText("123 Tech Park, Bangalore, KA 560001", 50, 736, 10);
+page1.AddText("GSTIN: 222222222222225", 50, 724, 10);
 
-page1.AddText("Buyer:", 350, 760, 10, "F1");
-page1.AddText("UnlimitedPDF", 350, 748, 10, "F1");
-page1.AddText("456 Code Street, Hyderabad, TS 500001", 350, 736, 10, "F1");
+page1.AddText("Buyer:", 350, 760, 10);
+page1.AddText("UnlimitedPDF", 350, 748, 10);
+page1.AddText("456 Code Street, Hyderabad, TS 500001", 350, 736, 10);
 
 // Invoice Metadata
-page1.AddText($"Invoice No: INV-{DateTime.Now:yyyy-MM-dd}-001", 50, 690, 10, "F1");
-page1.AddText($"Date: {DateTime.Now:dd-MMM-yyyy}", 50, 678, 10, "F1");
+page1.AddText($"Invoice No: INV-{DateTime.Now:yyyy-MM-dd}-001", 50, 690, 10);
+page1.AddText($"Date: {DateTime.Now:dd-MMM-yyyy}", 50, 678, 10);
 
 // 2. Items Table
 var itemsTable = page1.AddTable(50, 650, 512);
@@ -102,9 +102,9 @@ totalValueCell.HAlign = PdfCellHorizontalAlignment.Right;
 totalValueCell.Background = PdfColor.LightGray;
 
 // 4. Terms and Conditions
-page1.AddText("Terms & Conditions:", 50, 450, 10, "F1");
-page1.AddText("1. Payment due within 30 days.", 50, 438, 9, "F1");
-page1.AddText("2. Goods once sold will not be taken back.", 50, 426, 9, "F1");
+page1.AddText("Terms & Conditions:", 50, 450, 10);
+page1.AddText("1. Payment due within 30 days.", 50, 438, 9);
+page1.AddText("2. Goods once sold will not be taken back.", 50, 426, 9);
 
 // --- Page 2: Other Content ---
 var page2 = pdfDocument.AddPage();
@@ -115,7 +115,6 @@ var page3 = pdfDocument.AddPage();
 page3.AddText("This is the first line on the third page.", 50, 750, 12);
 
 pdfDocument.Save(pdfFilePath);
-
 
 Console.WriteLine("End: Unlimited PDF");
 Console.ReadLine();

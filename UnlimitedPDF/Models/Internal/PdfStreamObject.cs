@@ -5,6 +5,11 @@
 /// </summary>
 internal class PdfStreamObject : PdfObject
 {
+    public PdfStreamObject(int objectNumber, string content, int generationNumber = 0)
+        : base(objectNumber, content, generationNumber)
+    {
+    }
+
     /// <summary>
     /// Gets or sets the raw byte data for the stream.
     /// </summary>
@@ -20,7 +25,7 @@ internal class PdfStreamObject : PdfObject
         sb.AppendLine($"{ObjectNumber} {GenerationNumber} obj");
         sb.AppendLine($"<< /Length {StreamData.Length} >>");
         sb.AppendLine("stream");
-        sb.AppendLine(Encoding.ASCII.GetString(StreamData));
+        sb.AppendLine(Encoding.ASCII.GetString(StreamData ?? new byte[0]));
         sb.AppendLine("endstream");
         sb.AppendLine("endobj");
         return sb.ToString();

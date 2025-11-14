@@ -3,12 +3,17 @@
 /// <summary>
 /// Represents the document catalog, the root object of a PDF's object hierarchy.
 /// </summary>
-internal class PdfCatalog
+internal sealed class PdfCatalog
 {
+    public PdfCatalog(PdfIndirectReference pages)
+    {
+        Pages = pages;
+    }
+
     /// <summary>
-    /// Gets or sets the indirect reference to the page tree root (<see cref="PdfPages"/> object).
+    /// Gets the indirect reference to the page tree root (<see cref="PdfPages"/> object).
     /// </summary>
-    public PdfIndirectReference Pages { get; set; } = new PdfIndirectReference();
+    public PdfIndirectReference Pages { get; }
 
     /// <summary>
     /// Returns the string representation of the PDF catalog dictionary.

@@ -8,7 +8,7 @@ internal class PdfPage
     /// <summary>
     /// Gets or sets the indirect reference to the parent page tree node (<see cref="PdfPages"/> object).
     /// </summary>
-    public PdfIndirectReference Parent { get; set; }
+    public PdfIndirectReference Parent { get; set; } = default!;
 
     /// <summary>
     /// Gets or sets the page's dimensions, represented as a PDF MediaBox string (e.g., "[0 0 595 842]"):
@@ -18,7 +18,7 @@ internal class PdfPage
     /// <summary>
     /// Gets or sets the indirect reference to the page's content stream (<see cref="PdfStreamObject"/>).
     /// </summary>
-    public PdfIndirectReference Contents { get; set; }
+    public PdfIndirectReference Contents { get; set; } = default!;
 
     /// <summary>
     /// Gets or sets the dictionary of resources for the page, such as fonts.

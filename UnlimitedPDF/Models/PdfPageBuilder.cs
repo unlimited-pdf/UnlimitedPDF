@@ -77,29 +77,29 @@ public class PdfPageBuilder
     private string RenderTable(PdfTable table)
     {
         var sb = new StringBuilder();
-        var fixedTable = table.ToFixedTable();
-        double currentY = fixedTable.Y;
+        double currentY = table.Y;
+        var columnWidths = table.GetEffectiveColumnWidths();
 
-        for (int r = 0; r < fixedTable.Rows; r++)
+        for (int r = 0; r < table.RowCount; r++)
         {
-            double currentX = fixedTable.X;
-            for (int c = 0; c < fixedTable.Cols; c++)
+            double currentX = table.X;
+            for (int c = 0; c < table.ColCount; c++)
             {
-                var cell = fixedTable.Cells[r, c];
-                double cellWidth = fixedTable.ColumnWidths[c];
+                var cell = table.GetCell(r, c);
+                double cellWidth = columnWidths[c];
 
                 sb.AppendLine("q"); // Save graphics state
 
                 // Draw background
                 var bg = cell.Background;
                 sb.AppendLine($"{bg.R:F3} {bg.G:F3} {bg.B:F3} rg"); // Set fill color
-                sb.AppendLine($"{currentX} {currentY - fixedTable.RowHeight} {cellWidth} {fixedTable.RowHeight} re f"); // Draw and fill rectangle
+                sb.AppendLine($"{currentX} {currentY - table.RowHeight} {cellWidth} {table.RowHeight} re f"); // Draw and fill rectangle
 
                 // Draw borders
                 var border = cell.LeftBorder; // Using left as a proxy for all for now
                 sb.AppendLine($"{border.Color.R:F3} {border.Color.G:F3} {border.Color.B:F3} RG"); // Set stroke color
                 sb.AppendLine($"{border.Width} w"); // Border width
-                sb.AppendLine($"{currentX} {currentY - fixedTable.RowHeight} {cellWidth} {fixedTable.RowHeight} re s"); // Stroke rectangle
+                sb.AppendLine($"{currentX} {currentY - table.RowHeight} {cellWidth} {table.RowHeight} re s"); // Stroke rectangle
 
                 // Draw text
                 if (!string.IsNullOrEmpty(cell.Text))
@@ -125,7 +125,7 @@ public class PdfPageBuilder
                             break;
                     }
 
-                    double textY = currentY - (fixedTable.RowHeight / 2) - 4; // Simple middle alignment
+                    double textY = currentY - (table.RowHeight / 2) - 4; // Simple middle alignment
                     sb.AppendLine($"1 0 0 1 {textX} {textY} Tm"); // Set text matrix for absolute position
                     sb.AppendLine($"({cell.Text}) Tj"); // Show text
                     sb.AppendLine("ET"); // End text
@@ -135,7 +135,7 @@ public class PdfPageBuilder
 
                 currentX += cellWidth;
             }
-            currentY -= fixedTable.RowHeight;
+            currentY -= table.RowHeight;
         }
 
         return sb.ToString();

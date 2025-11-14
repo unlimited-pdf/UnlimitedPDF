@@ -6,8 +6,8 @@ A powerful and flexible library for creating, manipulating, and managing PDF doc
 
 ## Status
 
-[![NuGet](https://img.shields.io/nuget/vpre/UnlimitedPDF)](https://www.nuget.org/packages/blazor.bootstrap/absoluteLatest)
-[![NuGet](https://img.shields.io/nuget/dt/UnlimitedPDF.svg)](https://www.nuget.org/packages/blazor.bootstrap/absoluteLatest)
+[![NuGet](https://img.shields.io/nuget/vpre/UnlimitedPDF)](https://www.nuget.org/packages/unlimitedpdf/absoluteLatest)
+[![NuGet](https://img.shields.io/nuget/dt/UnlimitedPDF.svg)](https://www.nuget.org/packages/unlimitedpdf/absoluteLatest)
 
 ## Table of contents
 
